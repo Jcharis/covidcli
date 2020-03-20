@@ -6,15 +6,15 @@ import time
 import os
 
 timestr = time.strftime("%Y%m%d-%H%M%S")
-from pyfiglet import Figlet
 from click_help_colors import HelpColorsGroup, HelpColorsCommand
+from pyfiglet import Figlet
 
 
 # DEFAULT URLS FOR DATASOURCE
 confirmed_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
 recovered_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
 death_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
-
+previous_cases_url = "https://raw.githubusercontent.com/Jcharis/covidcli/master/covidcli/data/coronavirus_dataset.csv"
 
 def get_n_melt_data(data_url, case_type):
     df = pd.read_csv(data_url)
@@ -36,7 +36,7 @@ deaths_df = get_n_melt_data(death_cases_url, "Deaths")
 @click.group(
     cls=HelpColorsGroup, help_headers_color="yellow", help_options_color="cyan"
 )
-@click.version_option("0.0.1", prog_name="covidcli")
+@click.version_option("0.1.3", prog_name="covidcli")
 def main():
     """Covid-cli : A simple CLI for Getting info about Coronavirus Outbreak"""
     pass
@@ -68,7 +68,7 @@ def show(cases):
 
 @main.group()
 def get():
-    """Get Info about Latest|Previous|Status|dataset"""
+    """Get Info of cases by latest|previous|status|dataset"""
     pass
 
 
@@ -85,7 +85,7 @@ def get_latest():
     )
     click.echo("=============================")
     df = merge_data(confirm_df, recovered_df, deaths_df)
-    df.to_csv("coronavirus_dataset.csv", index=False)
+    # df.to_csv("coronavirus_dataset.csv", index=False)
     total_confirmed = df["Confirmed"].sum()
     total_recovered = df["Recovered"].sum()
     total_deaths = df["Deaths"].sum()
@@ -106,7 +106,7 @@ def get_previous():
     """
     click.echo("Showing Previous Cases")
     click.echo("=============================")
-    prev_df = pd.read_csv(os.path.join("coronavirus_dataset.csv"))
+    prev_df = pd.read_csv(previous_cases_url)
     total_confirmed = prev_df["Confirmed"].sum()
     total_recovered = prev_df["Recovered"].sum()
     total_deaths = prev_df["Deaths"].sum()
@@ -147,6 +147,11 @@ def get_status(countryname):
 
 @get.command("dataset")
 def get_dataset():
+    """Get Dataset or Download dataset
+    
+    eg. covidcli get dataset
+
+    """
     click.echo("Fetching Dataset")
     click.echo(
         click.style("Accessed Time::", fg="blue") + "{}".format(datetime.datetime.now())
@@ -214,14 +219,14 @@ def search(countryname, cases):
             )
         )
     elif cases == "previous":
-        prev_df = pd.read_csv("coronavirus_dataset.csv")
+        prev_df = pd.read_csv(previous_cases_url)
         prev_country_df = prev_df[prev_df["Country/Region"] == countryname]
         click.echo("Showing Previous Data")
         click.echo(prev_country_df)
     elif cases == "latest":
         current_df = merge_data(confirm_df, recovered_df, deaths_df)
         current_country_df = current_df[current_df["Country/Region"] == countryname]
-        click.echo("Showing Previous Data")
+        click.echo("Showing Latest Data")
         click.echo(current_country_df)
     else:
         click.echo(country_df)
@@ -230,11 +235,11 @@ def search(countryname, cases):
 @main.command()
 def info():
     """Info About CLI """
-    f = Figlet(font="standard")
-    click.echo(f.renderText("Covid-cli"))
-    click.secho("covidcli: a simple CLI for tracking Coronavirus Outbreak", fg="cyan")
+    f = Figlet(font='standard')
+    click.echo(f.renderText('Covid-cli'))
+    click.secho("covidcli: a simple CLI for tracking Coronavirus Outbreak",fg='cyan')
     click.echo("Source of Data: John Hopkins ")
-    click.secho("Jesus Saves@JCharisTech", fg="cyan")
+    click.secho("Jesus Saves@JCharisTech",fg='cyan')
     click.echo("By: Jesse E.Agbe(JCharis)")
 
 

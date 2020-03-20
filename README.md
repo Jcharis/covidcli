@@ -9,7 +9,6 @@
 + tabulate
 
 
-
 #### Installation
 ```bash
 pip install covidcli
