@@ -3,7 +3,8 @@
 
 
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/covidcli)
-![GitHub](https://img.shields.io/github/license/jcharis/covidcli)
+
+[![GitHub license](https://img.shields.io/github/license/Jcharis/covidcli)](https://github.com/Jcharis/covidcli/blob/master/LICENSE)
 
 
 #### Dependencies
