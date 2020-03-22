@@ -14,6 +14,12 @@
 pip install covidcli
 ```
 
+#### Screenshot
+![](images/image01.png)
+
+
+![](images/image02.png)
+
 ### Usage
 #### Show Cases of Coronavirus By confirmed|recovered|deaths|all
 ```bash
