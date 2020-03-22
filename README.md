@@ -2,6 +2,10 @@
 + A simple CLI for tracking and getting info about Coronavirus Outbreak
 
 
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/covidcli)
+![GitHub](https://img.shields.io/github/license/jcharis/covidcli)
+
+
 #### Dependencies
 + click
 + pandas
