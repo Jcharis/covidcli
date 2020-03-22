@@ -36,7 +36,7 @@ deaths_df = get_n_melt_data(death_cases_url, "Deaths")
 @click.group(
     cls=HelpColorsGroup, help_headers_color="yellow", help_options_color="cyan"
 )
-@click.version_option("0.1.3", prog_name="covidcli")
+@click.version_option("0.1.4", prog_name="covidcli")
 def main():
     """Covid-cli : A simple CLI for Getting info about Coronavirus Outbreak"""
     pass
@@ -45,7 +45,11 @@ def main():
 @main.command()
 @click.argument("cases", type=click.Choice(["confirmed", "recovered", "deaths", "all"]))
 def show(cases):
-    """Show Cases of Coronavirus by Confirmed|Recovered|Deaths|Previous|Latest"""
+    """Show Cases of Coronavirus by confirmed|recovered|deaths|all in summary
+
+    eg. covidcli show confirmed 
+
+    """
     click.secho("Showing:: {} cases".format(cases), bg="blue")
     click.echo("===========================================")
     if cases == "confirmed":
@@ -63,7 +67,7 @@ def show(cases):
         click.echo(deaths_df)
     elif cases == "all":
         df = merge_data(confirm_df, recovered_df, deaths_df)
-        click.echo(df.tail(20).to_markdown())
+        click.echo(df)
 
 
 @main.group()
@@ -99,12 +103,16 @@ def get_latest():
 
 @get.command("previous")
 def get_previous():
-    """Get Previous Cases (uses yesterdays dataset)
+    """Get Previous Cases (day before yesterday dataset)
     
     eg. covidcli get previous
 
     """
     click.echo("Showing Previous Cases")
+    previous_date_for_dataset = datetime.datetime.utcnow() - datetime.timedelta(days=2)
+    click.echo(
+        click.style("Previous Time::", fg="blue") + "{}".format(previous_date_for_dataset)
+    )
     click.echo("=============================")
     prev_df = pd.read_csv(previous_cases_url)
     total_confirmed = prev_df["Confirmed"].sum()
@@ -158,12 +166,12 @@ def get_dataset():
     )
     click.echo("=============================")
     current_df = merge_data(confirm_df, recovered_df, deaths_df)
-    click.echo(current_df.tail(20).to_markdown())
+    # click.echo(current_df.tail(10))
     file_name = "coronavirus_dataset_{}.csv".format(timestr)
-    current_df.to_csv(file_name, index=False)
-    click.secho(
-        "Finished Saving Dataset as {}".format(file_name), fg="white", bg="blue"
-    )
+    with click.progressbar(range(5),label='Downloading Dataset:') as bar:
+        for i in bar:
+            current_df.to_csv(file_name, index=False)
+    click.echo(click.style("Finished!! Saved as ::",fg="blue")+ "{}".format(file_name))
 
 
 @main.command()
@@ -222,11 +230,17 @@ def search(countryname, cases):
         prev_df = pd.read_csv(previous_cases_url)
         prev_country_df = prev_df[prev_df["Country/Region"] == countryname]
         click.echo("Showing Previous Data")
+        previous_date_for_dataset = datetime.datetime.utcnow() - datetime.timedelta(days=2)
+        click.echo(click.style("Previous Time::", fg="blue") + "{}".format(previous_date_for_dataset))
         click.echo(prev_country_df)
     elif cases == "latest":
         current_df = merge_data(confirm_df, recovered_df, deaths_df)
         current_country_df = current_df[current_df["Country/Region"] == countryname]
         click.echo("Showing Latest Data")
+        click.echo(
+            click.style("Accessed Time:: ", fg="blue")
+            + "{}".format(datetime.datetime.now())
+        )
         click.echo(current_country_df)
     else:
         click.echo(country_df)
@@ -238,9 +252,9 @@ def info():
     f = Figlet(font='standard')
     click.echo(f.renderText('Covid-cli'))
     click.secho("covidcli: a simple CLI for tracking Coronavirus Outbreak",fg='cyan')
-    click.echo("Source of Data: John Hopkins ")
+    click.echo("Source of Data: John Hopkins [https://github.com/CSSEGISandData/COVID-19] ")
     click.secho("Jesus Saves@JCharisTech",fg='cyan')
-    click.echo("By: Jesse E.Agbe(JCharis)")
+    click.echo("Author: Jesse E.Agbe(JCharis)")
 
 
 if __name__ == "__main__":
