@@ -36,7 +36,7 @@ deaths_df = get_n_melt_data(death_cases_url, "Deaths")
 @click.group(
     cls=HelpColorsGroup, help_headers_color="yellow", help_options_color="cyan"
 )
-@click.version_option("0.1.4", prog_name="covidcli")
+@click.version_option("0.1.5", prog_name="covidcli")
 def main():
     """Covid-cli : A simple CLI for Getting info about Coronavirus Outbreak"""
     pass
@@ -74,6 +74,7 @@ def show(cases):
 def get():
     """Get Info of cases by latest|previous|status|dataset"""
     pass
+
 
 
 @get.command("latest")
@@ -174,6 +175,32 @@ def get_dataset():
     click.echo(click.style("Finished!! Saved as ::",fg="blue")+ "{}".format(file_name))
 
 
+
+@get.command("top")
+@click.option('--number','-n',help='Specify Number of Order for Ranking Countries Affected',default=10,type=int)
+def get_top(number):
+    """Show Top n Countries Affected
+    
+    eg. covidcli get top 
+
+    eg. covidcli get top --number 30
+
+    """
+    click.echo("Top {} Countries Affected".format(number))
+    click.echo(
+        click.style("Accessed Time::", fg="blue") + "{}".format(datetime.datetime.now())
+    )
+    click.echo("=============================")
+    current_df = merge_data(confirm_df, recovered_df, deaths_df)
+    with click.progressbar(range(number),label='Analysing Data:') as bar:
+        for i in bar:
+            grp_countries = current_df.groupby('Country/Region')['Confirmed'].sum()
+            result = grp_countries.nlargest(number)
+
+    click.secho("Top {} Countries Affected".format(number),fg='blue')
+    click.echo(result)
+
+
 @main.command()
 @click.argument("countryname")
 @click.option(
@@ -244,6 +271,33 @@ def search(countryname, cases):
         click.echo(current_country_df)
     else:
         click.echo(country_df)
+
+
+@main.command('list')
+@click.argument('term',type=click.Choice(['countries','states','province']))
+def list_countries(term):
+    """List All Countries/States Affected
+
+    eg. covidcli list countries
+
+    """
+    click.echo("List of {} Affected".format(term.title()))
+    click.echo(
+        click.style("Accessed Time::", fg="blue") + "{}".format(datetime.datetime.now())
+    )
+    click.echo("=============================")
+    df = merge_data(confirm_df, recovered_df, deaths_df)
+    if term == 'countries':
+        result_list = df['Country/Region'].unique()
+    elif term == 'states':
+        result_list = df['Province/State'].unique()
+    elif term == 'province':
+        result_list = df['Province/State'].unique()
+    
+    click.echo(click.style("Total Number::", fg="blue") + "{}".format(len(result_list)))
+    click.echo(result_list)
+
+
 
 
 @main.command()
