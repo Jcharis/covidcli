@@ -200,6 +200,33 @@ def get_top(number):
     click.secho("Top {} Countries Affected".format(number),fg='blue')
     click.echo(result)
 
+@get.command("date")
+@click.argument('search_date')
+def get_date(search_date):
+    """Get Cases By Date Worldwide
+    
+    eg. covidcli get date yyyy-mm-dd
+
+    eg. covidcli get date 2020-02-20
+
+    """
+    click.echo("Showing {} Cases Worldwide ".format(search_date))
+    click.echo(
+        click.style("Accessed Time::", fg="blue") + "{}".format(datetime.datetime.now())
+    )
+    click.echo("=============================")
+    current_df = merge_data(confirm_df, recovered_df, deaths_df)
+    with click.progressbar(range(10),label='Analysing Data:') as bar:
+        for i in bar:
+            df_per_day = current_df.groupby("Date")[['Confirmed','Recovered', 'Deaths']].sum()
+            df_per_day['cases_dates'] = pd.to_datetime(df_per_day.index)
+            ts = df_per_day.set_index('cases_dates')
+            result = ts[search_date]
+
+
+    click.secho("Showing Case For {}".format(search_date),fg='blue')
+    click.echo(result)
+
 
 @main.command()
 @click.argument("countryname")
@@ -296,6 +323,26 @@ def list_countries(term):
     
     click.echo(click.style("Total Number::", fg="blue") + "{}".format(len(result_list)))
     click.echo(result_list)
+
+
+@main.command('compare')
+@click.argument('country',nargs=-1)
+def compare_countries(country):
+    """Compare Countries Affected
+
+    eg. covidcli compare Ghana China Italy
+
+    """
+    click.echo("Comparison of {} Affected".format(country))
+    click.echo(
+        click.style("Accessed Time::", fg="blue") + "{}".format(datetime.datetime.now())
+    )
+    click.echo("=============================")
+    df = merge_data(confirm_df, recovered_df, deaths_df)
+    list_of_compared_countries = country
+    grp_countries = df.groupby('Country/Region')['Confirmed','Recovered','Deaths'].sum()
+    for c in list_of_compared_countries:
+        click.echo(grp_countries[grp_countries.index == c])
 
 
 
