@@ -20,10 +20,10 @@ pip install covidcli
 ```
 
 #### Screenshot
-![](images/image01.png)
+![](https://github.com/Jcharis/covidcli/blob/master/images/image01.png)
 
 
-![](images/image02.png)
+![](https://github.com/Jcharis/covidcli/blob/master/images/image02.png)
 
 ### Usage
 #### Show Cases of Coronavirus
@@ -175,8 +175,19 @@ Nigeria             139.0        8.0     0.0
 
 ```
 
+
 #### Credits For Data
 + https://github.com/CSSEGISandData
+
+#### Fixes and Update
+** Added **
++ Comparison Between Countries
++ Get Cases By Date
++ Active Cases
+
+** Fixes **
++ Data Discrepancy
+
 
 #### By 
 + Jesse E.Agbe(JCharis)
