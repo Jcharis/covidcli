@@ -10,11 +10,19 @@ from click_help_colors import HelpColorsGroup, HelpColorsCommand
 from pyfiglet import Figlet
 
 
-# DEFAULT URLS FOR DATASOURCE
-confirmed_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
-recovered_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
-death_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
+# DEFAULT URLS FOR DATASOURCE Original Deprecated
+# confirmed_cases_url_deprecated = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
+# recovered_cases_url_deprecated = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
+# death_cases_url_deprecated = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
+# # previous_cases_url = "https://raw.githubusercontent.com/Jcharis/covidcli/master/covidcli/data/coronavirus_dataset.csv"
+
+
+# DEFAULT URLS FOR DATASOURCE Modified
+confirmed_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+recovered_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv"
+death_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 previous_cases_url = "https://raw.githubusercontent.com/Jcharis/covidcli/master/covidcli/data/coronavirus_dataset.csv"
+
 
 def get_n_melt_data(data_url, case_type):
     df = pd.read_csv(data_url)
@@ -27,6 +35,39 @@ def merge_data(confirm_df, recovered_df, deaths_df):
     new_df = confirm_df.join(recovered_df["Recovered"]).join(deaths_df["Deaths"])
     return new_df
 
+def find_active_cases(total_confirmed,total_recovered,total_deaths):
+    active_cases = total_confirmed -(total_recovered + total_deaths)
+    if active_cases < 0:
+        result = 'Uncertain'
+    else:
+        result = int(active_cases)
+    return result
+
+def is_recovered_more(total_confirmed,total_recovered):
+    if total_recovered > total_confirmed:
+        click.echo(click.style("Error:", fg="red") + " {}".format('Data Discrepancy'))
+        click.secho('Recovered Cases MORE THAN Confirmed Cases!!!',fg='red')
+
+def find_discrepancy(total_confirmed,total_recovered):
+    if total_recovered > total_confirmed:
+        click.echo(click.style("Error:", fg="blue") + " {}".format('Data Discrepancy'))
+        click.secho('Recovered Cases Exceed Confirmed Cases!!!',fg='red')
+
+
+    
+
+
+
+# def get_n_melt_data2(data_url,data_url_glob, case_type):
+#     try:
+#         df = pd.read_csv(data_url_glob)
+#     except Exception as e:
+#         df = pd.read_csv(data_url)
+#     melted_df = df.melt(id_vars=["Province/State", "Country/Region", "Lat", "Long"])
+#     melted_df.rename(columns={"variable": "Date", "value": case_type}, inplace=True)
+#     return melted_df
+
+
 
 confirm_df = get_n_melt_data(confirmed_cases_url, "Confirmed")
 recovered_df = get_n_melt_data(recovered_cases_url, "Recovered")
@@ -36,7 +77,7 @@ deaths_df = get_n_melt_data(death_cases_url, "Deaths")
 @click.group(
     cls=HelpColorsGroup, help_headers_color="yellow", help_options_color="cyan"
 )
-@click.version_option("0.1.5", prog_name="covidcli")
+@click.version_option("0.1.6", prog_name="covidcli")
 def main():
     """Covid-cli : A simple CLI for Getting info about Coronavirus Outbreak"""
     pass
@@ -54,16 +95,16 @@ def show(cases):
     click.echo("===========================================")
     if cases == "confirmed":
         click.secho(
-            "Number of Confirmed Cases:: {}".format(confirm_df["Confirmed"].sum())
+            "Number of Confirmed Cases:: {}".format(confirm_df["Confirmed"].max())
         )
         click.echo(confirm_df)
     elif cases == "recovered":
         click.secho(
-            "Number of Confirmed Cases:: {}".format(recovered_df["Recovered"].sum())
+            "Number of Confirmed Cases:: {}".format(recovered_df["Recovered"].max())
         )
         click.echo(recovered_df)
     elif cases == "deaths":
-        click.secho("Number of Confirmed Cases:: {}".format(deaths_df["Deaths"].sum()))
+        click.secho("Number of Confirmed Cases:: {}".format(deaths_df["Deaths"].max()))
         click.echo(deaths_df)
     elif cases == "all":
         df = merge_data(confirm_df, recovered_df, deaths_df)
@@ -91,15 +132,18 @@ def get_latest():
     click.echo("=============================")
     df = merge_data(confirm_df, recovered_df, deaths_df)
     # df.to_csv("coronavirus_dataset.csv", index=False)
-    total_confirmed = df["Confirmed"].sum()
-    total_recovered = df["Recovered"].sum()
-    total_deaths = df["Deaths"].sum()
+    total_confirmed = df["Confirmed"].max()
+    total_recovered = df["Recovered"].max()
+    total_deaths = df["Deaths"].max()
+    total_active_cases = find_active_cases(total_confirmed,total_deaths,total_recovered)
     stats_dict = {
-        "Confirmed Cases": total_confirmed,
-        "Recovered Cases": total_recovered,
-        "Death Cases": total_deaths,
+        "Confirmed Cases": int(total_confirmed),
+        "Recovered Cases": int(total_recovered),
+        "Death Cases": int(total_deaths),
+        "Active Cases": total_active_cases
     }
     click.echo(stats_dict)
+
 
 
 @get.command("previous")
@@ -116,14 +160,16 @@ def get_previous():
     )
     click.echo("=============================")
     prev_df = pd.read_csv(previous_cases_url)
-    total_confirmed = prev_df["Confirmed"].sum()
-    total_recovered = prev_df["Recovered"].sum()
-    total_deaths = prev_df["Deaths"].sum()
+    total_confirmed = prev_df["Confirmed"].max()
+    total_recovered = prev_df["Recovered"].max()
+    total_deaths = prev_df["Deaths"].max()
+    total_active_cases = find_active_cases(total_confirmed,total_recovered,total_deaths)
     stats_dict = {
-        "Confirmed Cases": total_confirmed,
-        "Recovered Cases": total_recovered,
-        "Death Cases": total_deaths,
-    }
+         "Confirmed Cases": int(total_confirmed),
+         "Recovered Cases": int(total_recovered),
+         "Death Cases": int(total_deaths),
+         "Active Cases": total_active_cases
+     }
     click.echo(stats_dict)
 
 
@@ -143,15 +189,19 @@ def get_status(countryname):
     click.echo("=============================")
     new_df = merge_data(confirm_df, recovered_df, deaths_df)
     single_country_df = new_df[new_df["Country/Region"] == countryname]
-    total_confirmed = single_country_df["Confirmed"].sum()
-    total_recovered = single_country_df["Recovered"].sum()
-    total_deaths = single_country_df["Deaths"].sum()
+    total_confirmed = single_country_df["Confirmed"].max()
+    total_recovered = single_country_df["Recovered"].max()
+    total_deaths = single_country_df["Deaths"].max()
+    total_active_cases = find_active_cases(total_confirmed,total_recovered,total_deaths)
     stats_dict = {
-        "Confirmed Cases": total_confirmed,
-        "Recovered Cases": total_recovered,
-        "Death Cases": total_deaths,
+        "Confirmed Cases": int(total_confirmed),
+        "Recovered Cases": int(total_recovered),
+        "Death Cases": int(total_deaths),
+        "Active Cases": total_active_cases
     }
     click.echo(stats_dict)
+    calc_error = is_recovered_more(total_confirmed,total_recovered)
+    click.echo(calc_error)
 
 
 @get.command("dataset")
@@ -194,7 +244,7 @@ def get_top(number):
     current_df = merge_data(confirm_df, recovered_df, deaths_df)
     with click.progressbar(range(number),label='Analysing Data:') as bar:
         for i in bar:
-            grp_countries = current_df.groupby('Country/Region')['Confirmed'].sum()
+            grp_countries = current_df.groupby('Country/Region')['Confirmed'].max()
             result = grp_countries.nlargest(number)
 
     click.secho("Top {} Countries Affected".format(number),fg='blue')
@@ -218,7 +268,7 @@ def get_date(search_date):
     current_df = merge_data(confirm_df, recovered_df, deaths_df)
     with click.progressbar(range(10),label='Analysing Data:') as bar:
         for i in bar:
-            df_per_day = current_df.groupby("Date")[['Confirmed','Recovered', 'Deaths']].sum()
+            df_per_day = current_df.groupby("Date")[['Confirmed','Recovered', 'Deaths']].max()
             df_per_day['cases_dates'] = pd.to_datetime(df_per_day.index)
             ts = df_per_day.set_index('cases_dates')
             result = ts[search_date]
@@ -248,7 +298,7 @@ def search(countryname, cases):
     df = merge_data(confirm_df, recovered_df, deaths_df)
     country_df = df[df["Country/Region"] == countryname]
     if cases == "confirmed":
-        total_confirmed = country_df["Confirmed"].sum()
+        total_confirmed = country_df["Confirmed"].max()
         click.echo(
             click.style("Accessed Time:: ", fg="blue")
             + "{}".format(datetime.datetime.now())
@@ -259,7 +309,7 @@ def search(countryname, cases):
             )
         )
     elif cases == "recovered":
-        total_recovered = country_df["Recovered"].sum()
+        total_recovered = country_df["Recovered"].max()
         click.echo(
             click.style("Accessed Time:: ", fg="blue")
             + "{}".format(datetime.datetime.now())
@@ -270,7 +320,7 @@ def search(countryname, cases):
             )
         )
     elif cases == "deaths":
-        total_deaths = country_df["Deaths"].sum()
+        total_deaths = country_df["Deaths"].max()
         click.echo(
             click.style("Accessed Time:: ", fg="blue")
             + "{}".format(datetime.datetime.now())
@@ -340,7 +390,7 @@ def compare_countries(country):
     click.echo("=============================")
     df = merge_data(confirm_df, recovered_df, deaths_df)
     list_of_compared_countries = country
-    grp_countries = df.groupby('Country/Region')['Confirmed','Recovered','Deaths'].sum()
+    grp_countries = df.groupby('Country/Region')['Confirmed','Recovered','Deaths'].max()
     for c in list_of_compared_countries:
         click.echo(grp_countries[grp_countries.index == c])
 
