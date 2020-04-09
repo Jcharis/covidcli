@@ -22,6 +22,8 @@ confirmed_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19
 recovered_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv"
 death_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 previous_cases_url = "https://raw.githubusercontent.com/Jcharis/covidcli/master/covidcli/data/coronavirus_dataset.csv"
+us_confirmed_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv"
+us_deaths_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
 
 
 def get_n_melt_data(data_url, case_type):
@@ -54,7 +56,18 @@ def find_discrepancy(total_confirmed,total_recovered):
         click.secho('Recovered Cases Exceed Confirmed Cases!!!',fg='red')
 
 
-    
+def get_n_melt_us_confirmed(data_url, case_type):
+    df = pd.read_csv(data_url)
+    melted_df = df.melt(id_vars=['UID', 'iso2', 'iso3', 'code3', 'FIPS', 'Admin2', 'Province_State','Country_Region', 'Lat', 'Long_', 'Combined_Key'])
+    melted_df.rename(columns={"variable": "Date", "value": case_type}, inplace=True)
+    return melted_df
+
+
+def get_n_melt_us_death(data_url, case_type):
+    df = pd.read_csv(data_url)
+    melted_df = df.melt(id_vars=['UID', 'iso2', 'iso3', 'code3', 'FIPS', 'Admin2', 'Province_State','Country_Region', 'Lat', 'Long_', 'Combined_Key', 'Population'])
+    melted_df.rename(columns={"variable": "Date", "value": case_type}, inplace=True)
+    return melted_df
 
 
 
@@ -77,7 +90,7 @@ deaths_df = get_n_melt_data(death_cases_url, "Deaths")
 @click.group(
     cls=HelpColorsGroup, help_headers_color="yellow", help_options_color="cyan"
 )
-@click.version_option("0.1.6", prog_name="covidcli")
+@click.version_option("0.1.7", prog_name="covidcli")
 def main():
     """Covid-cli : A simple CLI for Getting info about Coronavirus Outbreak"""
     pass
@@ -133,7 +146,7 @@ def get_latest():
     df = merge_data(confirm_df, recovered_df, deaths_df)
     # df.to_csv("coronavirus_dataset.csv", index=False)
     total_confirmed = df["Confirmed"].max()
-    total_recovered = df["Recovered"].max()
+    total_recovered = recovered_df["Recovered"].max()
     total_deaths = df["Deaths"].max()
     total_active_cases = find_active_cases(total_confirmed,total_deaths,total_recovered)
     stats_dict = {
@@ -187,11 +200,14 @@ def get_status(countryname):
         click.style("Accessed Time::", fg="blue") + "{}".format(datetime.datetime.now())
     )
     click.echo("=============================")
-    new_df = merge_data(confirm_df, recovered_df, deaths_df)
-    single_country_df = new_df[new_df["Country/Region"] == countryname]
-    total_confirmed = single_country_df["Confirmed"].max()
-    total_recovered = single_country_df["Recovered"].max()
-    total_deaths = single_country_df["Deaths"].max()
+    # new_df = merge_data(confirm_df, recovered_df, deaths_df)
+    # single_country_df = new_df[new_df["Country/Region"] == countryname]
+    # total_confirmed = single_country_df["Confirmed"].max()
+    # total_recovered = single_country_df["Recovered"].max()
+    # total_deaths = single_country_df["Deaths"].max()
+    total_confirmed = confirm_df[confirm_df["Country/Region"]== countryname]['Confirmed'].max()
+    total_recovered = recovered_df[recovered_df["Country/Region"]== countryname]['Recovered'].max()
+    total_deaths = deaths_df[deaths_df["Country/Region"]== countryname]['Deaths'].max()
     total_active_cases = find_active_cases(total_confirmed,total_recovered,total_deaths)
     stats_dict = {
         "Confirmed Cases": int(total_confirmed),
@@ -278,6 +294,34 @@ def get_date(search_date):
     click.echo(result)
 
 
+@get.command("usa")
+@click.argument('statename')
+def get_us_states(statename):
+    """Get Only US Cases By State or ISO
+    
+    eg. covidcli get usa Washington
+
+
+    """
+    click.echo(click.style("State::", fg="blue") + "{}".format(statename))
+    click.echo(
+        click.style("Accessed Time::", fg="blue") + "{}".format(datetime.datetime.now())
+    )
+    click.echo("=============================")
+    us_confirmed_df = get_n_melt_us_confirmed(us_confirmed_cases_url,"Confirmed")
+    us_deaths_df = get_n_melt_us_death(us_deaths_cases_url,"Deaths")
+
+    total_us_confirmed = us_confirmed_df[us_confirmed_df['Province_State']== statename]['Confirmed'].max()
+    total_us_deaths = us_deaths_df[us_deaths_df['Province_State']== statename]['Deaths'].max()
+    stats_dict = {
+        "Confirmed Cases": total_us_confirmed,
+        "Death Cases": total_us_deaths,
+    }
+    click.echo(stats_dict)
+
+
+
+
 @main.command()
 @click.argument("countryname")
 @click.option(
@@ -309,7 +353,8 @@ def search(countryname, cases):
             )
         )
     elif cases == "recovered":
-        total_recovered = country_df["Recovered"].max()
+        # Added A Fix For Recovered As it Has More Rows than Confirmed & Deaths
+        total_recovered = recovered_df[recovered_df["Country/Region"]== countryname]['Recovered'].max()
         click.echo(
             click.style("Accessed Time:: ", fg="blue")
             + "{}".format(datetime.datetime.now())
