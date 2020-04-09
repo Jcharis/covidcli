@@ -15,7 +15,7 @@ recovered_df = get_n_melt_data(recovered_cases_url, "Recovered")
 deaths_df = get_n_melt_data(death_cases_url, "Deaths")
 
 def test_version():
-    assert __version__ == '0.1.6'
+    assert __version__ == '0.1.7'
 
 def test_data_received_from_url():
 	df = merge_data(confirm_df, recovered_df, deaths_df)

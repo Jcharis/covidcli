@@ -175,6 +175,17 @@ Nigeria             139.0        8.0     0.0
 
 ```
 
+#### For US States
+```bash
+covidcli get usa Washington
+```
+```bash
+State::Washington
+Accessed Time::2020-04-10 00:50:08.332228
+=============================
+{'Confirmed Cases': 3688, 'Death Cases': 244}
+
+```
 
 #### Credits For Data
 + https://github.com/CSSEGISandData

@@ -27,10 +27,10 @@ Installation
 Screenshot
 ----------
 
-.. figure:: images/image01.png
+.. figure:: https://github.com/Jcharis/covidcli/blob/master/images/image01.png
    :alt: 
 
-.. figure:: images/image02.png
+.. figure:: https://github.com/Jcharis/covidcli/blob/master/images/image02.png
    :alt: 
 
 Usage
@@ -191,10 +191,32 @@ Compare Cases of Multiple Countries
     Country/Region                              
     Nigeria             139.0        8.0     0.0
 
+For US States
+~~~~~~~~~~~~~
+
+.. code:: bash
+
+    covidcli get usa Washington
+
+.. code:: bash
+
+    State::Washington
+    Accessed Time::2020-04-10 00:50:08.332228
+    =============================
+    {'Confirmed Cases': 3688, 'Death Cases': 244}
+
 Credits For Data
 ~~~~~~~~~~~~~~~~
 
 -  https://github.com/CSSEGISandData
+
+Fixes and Update
+~~~~~~~~~~~~~~~~
+
+\*\* Added \*\* + Comparison Between Countries + Get Cases By Date +
+Active Cases
+
+\*\* Fixes \*\* + Data Discrepancy
 
 By
 ~~
