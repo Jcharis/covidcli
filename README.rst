@@ -27,10 +27,17 @@ Installation
 Screenshot
 ----------
 
+<<<<<<< HEAD
 .. figure:: https://github.com/Jcharis/covidcli/blob/master/images/image01.png
    :alt: 
 
 .. figure:: https://github.com/Jcharis/covidcli/blob/master/images/image02.png
+=======
+.. figure:: images/image01.png
+   :alt: 
+
+.. figure:: images/image02.png
+>>>>>>> 888be6bf25bc6ae041491a6a8af6b2c1564173ab
    :alt: 
 
 Usage
@@ -191,6 +198,7 @@ Compare Cases of Multiple Countries
     Country/Region                              
     Nigeria             139.0        8.0     0.0
 
+<<<<<<< HEAD
 For US States
 ~~~~~~~~~~~~~
 
@@ -205,11 +213,14 @@ For US States
     =============================
     {'Confirmed Cases': 3688, 'Death Cases': 244}
 
+=======
+>>>>>>> 888be6bf25bc6ae041491a6a8af6b2c1564173ab
 Credits For Data
 ~~~~~~~~~~~~~~~~
 
 -  https://github.com/CSSEGISandData
 
+<<<<<<< HEAD
 Fixes and Update
 ~~~~~~~~~~~~~~~~
 
@@ -218,6 +229,8 @@ Active Cases
 
 \*\* Fixes \*\* + Data Discrepancy
 
+=======
+>>>>>>> 888be6bf25bc6ae041491a6a8af6b2c1564173ab
 By
 ~~
 

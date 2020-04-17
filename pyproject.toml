@@ -1,6 +1,10 @@
 [tool.poetry]
 name = "covidcli"
+<<<<<<< HEAD
 version = "0.1.7"
+=======
+version = "0.1.6"
+>>>>>>> 888be6bf25bc6ae041491a6a8af6b2c1564173ab
 description = "Covidcli- A CLI For Tracking and Getting Info About Coronavirus Outbreak"
 authors = ["Jesse E.Agbe(JCharis) <jcharistech@gmail.com>"]
 license = "MIT"
