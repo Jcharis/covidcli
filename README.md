@@ -3,6 +3,7 @@
 
 
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/covidcli)
+
 [![GitHub license](https://img.shields.io/github/license/Jcharis/covidcli)](https://github.com/Jcharis/covidcli/blob/master/LICENSE)
 
 
@@ -19,10 +20,10 @@ pip install covidcli
 ```
 
 #### Screenshot
-![](images/image01.png)
+![](https://github.com/Jcharis/covidcli/blob/master/images/image01.png)
 
 
-![](images/image02.png)
+![](https://github.com/Jcharis/covidcli/blob/master/images/image02.png)
 
 ### Usage
 #### Show Cases of Coronavirus
@@ -135,9 +136,69 @@ Accessed Time:: 2020-03-24 11:12:44.237260
 
 ```
 
+#### Get/Show Cases By Date
+```bash
+covidcli get date 2020-02-20
+```
+```bash
+Showing 2020-02-20 Cases Worldwide 
+Accessed Time::2020-03-25 13:41:46.182374
+=============================
+Analysing Data:  [####################################]  100%
+Showing Case For 2020-02-20
+             Confirmed  Recovered  Deaths
+cases_dates                              
+2020-02-20     76197.0    18177.0  2247.0
+
+```
+
+#### Compare Cases of Multiple Countries
+```bash
+covidcli compare China Italy Nigeria US
+```
+```bash
+Comparison of ('China', 'US', 'Italy', 'Nigeria') Affected
+Accessed Time::2020-03-25 13:45:34.795250
+=============================
+                Confirmed  Recovered    Deaths
+Country/Region                                
+China           3531169.0  1787212.0  119412.0
+                Confirmed  Recovered  Deaths
+Country/Region                              
+US               159039.0      427.0  2276.0
+                Confirmed  Recovered   Deaths
+Country/Region                               
+Italy            497959.0    50954.0  39435.0
+                Confirmed  Recovered  Deaths
+Country/Region                              
+Nigeria             139.0        8.0     0.0
+
+```
+
+#### For US States
+```bash
+covidcli get usa Washington
+```
+```bash
+State::Washington
+Accessed Time::2020-04-10 00:50:08.332228
+=============================
+{'Confirmed Cases': 3688, 'Death Cases': 244}
+
+```
 
 #### Credits For Data
 + https://github.com/CSSEGISandData
+
+#### Fixes and Update
+** Added **
++ Comparison Between Countries
++ Get Cases By Date
++ Active Cases
+
+** Fixes **
++ Data Discrepancy
+
 
 #### By 
 + Jesse E.Agbe(JCharis)
